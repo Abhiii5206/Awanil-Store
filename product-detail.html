@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="View full product details — Velora Premium Bottles">
+  <title>Product Details — Velora</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">Awanil Store</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <!-- <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li> -->
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <main id="product-detail-root">
+    <!-- Breadcrumb -->
+    <div class="product-detail-breadcrumb">
+      <div class="container">
+        <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb"></nav>
+      </div>
+    </div>
+
+    <!-- Product Main Section -->
+    <section class="product-detail-section">
+      <div class="container">
+        <div class="product-detail-grid">
+
+          <!-- Image Gallery -->
+          <div class="product-detail-gallery reveal">
+            <div class="detail-gallery-main">
+              <img id="detail-main-image" src="" alt="Product image" class="detail-main-image">
+            </div>
+            <div class="detail-thumbnails" id="detail-thumbnails"></div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="product-detail-info reveal">
+            <span class="product-category" id="detail-category"></span>
+            <div id="detail-badges"></div>
+            <h1 class="detail-title" id="detail-title"></h1>
+
+            <div class="detail-rating-row" id="detail-rating"></div>
+
+            <div class="detail-price-row">
+              <span class="detail-price" id="detail-price"></span>
+              <span class="detail-mrp">MRP <del id="detail-mrp"></del></span>
+              <span class="detail-discount">15% off</span>
+            </div>
+
+            <p class="detail-short-desc" id="detail-short-desc"></p>
+
+            <ul class="detail-features" id="detail-features-list"></ul>
+
+            <!-- Options -->
+            <div class="detail-options">
+              <div class="detail-option-row">
+                <span class="detail-option-label">Capacity</span>
+                <span class="detail-option-value detail-capacity-badge" id="detail-capacity"></span>
+              </div>
+
+              <div class="detail-option-row">
+                <span class="detail-option-label">Availability</span>
+                <span id="detail-stock" class="stock-in"></span>
+              </div>
+
+              <div class="detail-option-row detail-qty-row">
+                <span class="detail-option-label">Quantity</span>
+                <div class="qty-selector">
+                  <button type="button" id="qty-minus" class="qty-btn" aria-label="Decrease quantity">−</button>
+                  <input type="number" id="detail-quantity" value="1" min="1" max="99" aria-label="Quantity">
+                  <button type="button" id="qty-plus" class="qty-btn" aria-label="Increase quantity">+</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="detail-actions">
+              <a href="#" id="detail-order-btn" class="btn btn-outline detail-action-btn">Add to Order</a>
+              <a href="#" id="detail-buy-btn" class="btn btn-primary detail-action-btn">Buy Now</a>
+            </div>
+
+            <div class="detail-delivery-info">
+              <div class="delivery-item">
+                <span class="delivery-icon">&#128666;</span>
+                <div>
+                  <strong>Free Delivery</strong>
+                  <p>On orders above ₹999</p>
+                </div>
+              </div>
+              <div class="delivery-item">
+                <span class="delivery-icon">&#128274;</span>
+                <div>
+                  <strong>Secure Packaging</strong>
+                  <p>Premium box with protective wrap</p>
+                </div>
+              </div>
+              <div class="delivery-item">
+                <span class="delivery-icon">&#128257;</span>
+                <div>
+                  <strong>Easy Returns</strong>
+                  <p>7-day return policy</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Description Tabs -->
+        <div class="detail-tabs reveal">
+          <div class="detail-tab-nav">
+            <button type="button" class="detail-tab-btn active" data-tab="tab-description">Description</button>
+            <button type="button" class="detail-tab-btn" data-tab="tab-specs">Specifications</button>
+          </div>
+          <div class="detail-tab-panels">
+            <div class="detail-tab-panel active" id="tab-description">
+              <h3>About this product</h3>
+              <p id="detail-full-desc"></p>
+            </div>
+            <div class="detail-tab-panel" id="tab-specs">
+              <h3>Product Specifications</h3>
+              <div class="specs-table" id="detail-specs-table"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Products -->
+    <!-- <section class="product-detail-related">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-label">Related</span>
+          <h2>Related Products</h2>
+          <p>More bottles from the same collection you might like.</p>
+        </div>
+        <p class="section-empty" id="related-empty" style="display: none;">No related products in this category yet.</p>
+        <div class="products-grid" id="related-products"></div>
+      </div>
+      
+    </section> -->
+
+    <!-- Similar Products -->
+    <section class="product-detail-related" style="background: var(--bg-card);">
+      <div class="container">
+        <div class="section-header reveal">
+          <span class="section-label">Similar</span>
+          <h2>Similar Products</h2>
+          <p>Other premium bottles you may also want to explore.</p>
+        </div>
+        <p class="section-empty" id="similar-empty" style="display: none;">No similar products available right now.</p>
+        <div class="products-grid" id="similar-products"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">VELORA</a>
+          <p>Premium bottles for those who value quality, design, and sustainability in every sip.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="products.html">All Products</a></li>
+            <li><a href="order.html">Place Order</a></li>
+            <li><a href="add-product.html">Add Product</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="contact.html">Help Center</a></li>
+            <li><a href="order.html">Track Order</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Velora. All rights reserved.</p>
+        <p>Premium Bottles, Elevated Living</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/product-detail.js"></script>
+</body>
+</html>

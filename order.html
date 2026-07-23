@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Place your order for premium Velora bottles — fast and secure.">
+  <title>Place Order — Velora</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">Awanil Store</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <!-- <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li> -->
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>Place Your Order</h1>
+      <p>Fill in your details below and we'll confirm your order via email.</p>
+    </div>
+  </header>
+
+  <section class="form-section">
+    <div class="container">
+      <div class="form-card wide">
+        <div id="form-alert" class="alert"></div>
+
+        <div class="setup-guide">
+          <h4>Gmail Setup Required (One-Time)</h4>
+          <ol>
+            <li>Create a free account at <a href="https://www.emailjs.com/" target="_blank" style="color: var(--accent-blue);">emailjs.com</a></li>
+            <li>Connect your Gmail under <strong>Email Services</strong></li>
+            <li>Create a template with variables: <code>{{customer_name}}</code>, <code>{{customer_email}}</code>, <code>{{customer_phone}}</code>, <code>{{product_name}}</code>, <code>{{quantity}}</code>, <code>{{total_price}}</code>, <code>{{address}}</code>, <code>{{city}}</code>, <code>{{state}}</code>, <code>{{pincode}}</code>, <code>{{notes}}</code></li>
+            <li>Add your Service ID, Template ID, and Public Key in <code>js/config.js</code></li>
+          </ol>
+        </div>
+
+        <div class="order-summary" id="order-summary">
+          <!-- Loaded by JavaScript -->
+        </div>
+
+        <form id="order-form">
+          <h2 style="font-size: 1.5rem; margin-bottom: 24px;">Order Details</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="product-select">Select Product <span class="required">*</span></label>
+              <select id="product-select" name="product" required>
+                <!-- Loaded by JavaScript -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="quantity">Quantity (Pieces) <span class="required">*</span></label>
+              <input type="number" id="quantity" name="quantity" min="1" max="99" value="1" required>
+            </div>
+          </div>
+
+          <h2 style="font-size: 1.5rem; margin: 32px 0 24px;">Personal Information</h2>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fullName">Full Name <span class="required">*</span></label>
+              <input type="text" id="fullName" name="fullName" required placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address <span class="required">*</span></label>
+              <input type="email" id="email" name="email" required placeholder="you@email.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone Number <span class="required">*</span></label>
+            <input type="tel" id="phone" name="phone" required placeholder="+91 98765 43210" pattern="[0-9+\s-]{10,15}">
+          </div>
+
+          <h2 style="font-size: 1.5rem; margin: 32px 0 24px;">Delivery Address</h2>
+
+          <div class="form-group">
+            <label for="address">Full Address <span class="required">*</span></label>
+            <textarea id="address" name="address" required placeholder="House/Flat No., Street, Landmark"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="city">City <span class="required">*</span></label>
+              <input type="text" id="city" name="city" required placeholder="Your city">
+            </div>
+            <div class="form-group">
+              <label for="state">State <span class="required">*</span></label>
+              <input type="text" id="state" name="state" required placeholder="Your state">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="pincode">Pincode <span class="required">*</span></label>
+            <input type="text" id="pincode" name="pincode" required placeholder="6-digit pincode" pattern="[0-9]{6}" maxlength="6">
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Additional Notes (Optional)</label>
+            <textarea id="notes" name="notes" placeholder="Any special instructions for delivery..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary form-submit">Place Order & Send to Gmail</button>
+          <p class="form-note">Your order details will be sent directly to our Gmail inbox.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">VELORA</a>
+          <p>Premium bottles for those who value quality, design, and sustainability in every sip.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="products.html">All Products</a></li>
+            <li><a href="order.html">Place Order</a></li>
+            <li><a href="add-product.html">Add Product</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="contact.html">Help Center</a></li>
+            <li><a href="order.html">Track Order</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Velora. All rights reserved.</p>
+        <p>Premium Bottles, Elevated Living</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/order.js"></script>
+</body>
+</html>

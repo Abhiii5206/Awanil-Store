@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Contact Velora — we're here to help with orders, questions, and support.">
+  <title>Contact — Velora</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">Awanil Store</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <!-- <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li> -->
+      </ul>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>Get in Touch</h1>
+      <p>Have a question or need help with your order? We'd love to hear from you.</p>
+    </div>
+  </header>
+
+  <section class="form-section">
+    <div class="container contact-grid">
+      <div class="contact-info reveal">
+        <h2>Contact Information</h2>
+        <div class="contact-item">
+          <div class="contact-icon">&#9993;</div>
+          <div>
+            <h4>Email</h4>
+            <p id="contact-emails">abhisheksiwan84@gmail.com</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">&#128222;</div>
+          <div>
+            <h4>Phone</h4>
+            <p>+91 9939234992</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">&#128205;</div>
+          <div>
+            <h4>Address</h4>
+            <p>Shiv Shakti Vihar, Lajpat Nagar,<br>Ghaziabad U.P. 201005,India</p>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="contact-icon">&#128337;</div>
+          <div>
+            <h4>Business Hours</h4>
+            <p>Mon – Sun: 9:00 AM – 7:00 PM<br>All Days Open..</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card reveal">
+        <div id="contact-alert" class="alert"></div>
+        <h2 style="font-size: 1.75rem; margin-bottom: 24px;">Send a Message</h2>
+        <form id="contact-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contact-name">Full Name <span class="required">*</span></label>
+              <input type="text" id="contact-name" name="name" required placeholder="Your name">
+            </div>
+            <div class="form-group">
+              <label for="contact-email-input">Email <span class="required">*</span></label>
+              <input type="email" id="contact-email-input" name="email" required placeholder="you@email.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="contact-subject">Subject</label>
+            <input type="text" id="contact-subject" name="subject" placeholder="How can we help?">
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Message <span class="required">*</span></label>
+            <textarea id="contact-message" name="message" required placeholder="Write your message here..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary form-submit">Send Message</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">VELORA</a>
+          <p>Premium bottles for those who value quality, design, and sustainability in every sip.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="products.html">All Products</a></li>
+            <li><a href="order.html">Place Order</a></li>
+            <li><a href="add-product.html">Add Product</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="contact.html">Help Center</a></li>
+            <li><a href="order.html">Track Order</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Velora. All rights reserved.</p>
+        <p>Premium Bottles, Elevated Living</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById('contact-email').textContent = SITE_CONFIG.ownerEmail;
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = this.name.value.trim();
+      const email = this.email.value.trim();
+      const subject = this.subject.value.trim() || 'General Inquiry';
+      const message = this.message.value.trim();
+
+      const mailSubject = encodeURIComponent(`Velora Contact: ${subject}`);
+      const mailBody = encodeURIComponent(
+        `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+      );
+
+      window.open(`mailto:${SITE_CONFIG.ownerEmail}?subject=${mailSubject}&body=${mailBody}`, '_blank');
+      showAlert('contact-alert', 'Your email client has been opened. Send the message to reach us!', 'success');
+      this.reset();
+    });
+  </script>
+</body>
+</html>

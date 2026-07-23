@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Add new products to your Velora shop easily.">
+  <title>Add Product — Velora Admin</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="index.html" class="logo">Awanil Store</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="products.html">Shop</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <!-- <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li>
+      </ul> -->
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <header class="page-header">
+    <div class="container">
+      <h1>Add New Product</h1>
+      <p>Easily add new bottles to your shop — no coding required.</p>
+    </div>
+  </header>
+
+  <section class="form-section">
+    <div class="container">
+      <div class="form-card wide">
+        <div id="admin-alert" class="alert"></div>
+
+        <div class="admin-header">
+          <h2 style="font-size: 1.5rem;">Product Details</h2>
+          <a href="products.html" class="btn btn-ghost">View Shop</a>
+        </div>
+
+        <form id="add-product-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productName">Product Name <span class="required">*</span></label>
+              <input type="text" id="productName" name="productName" required placeholder="e.g. Velora Pro 500ml">
+            </div>
+            <div class="form-group">
+              <label for="productPrice">Price (₹) <span class="required">*</span></label>
+              <input type="number" id="productPrice" name="productPrice" required min="1" placeholder="e.g. 1999">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productCategory">Category <span class="required">*</span></label>
+              <input type="text" id="productCategory" name="productCategory" required placeholder="e.g. Premium, Travel, Eco" list="category-suggestions">
+              <datalist id="category-suggestions">
+                <option value="Premium">
+                <option value="Classic">
+                <option value="Luxury">
+                <option value="Travel">
+                <option value="Eco">
+                <option value="Professional">
+              </datalist>
+            </div>
+            <div class="form-group">
+              <label for="productBadge">Badge (Optional)</label>
+              <input type="text" id="productBadge" name="productBadge" placeholder="e.g. New, Bestseller, Limited">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="productDescription">Description <span class="required">*</span></label>
+            <textarea id="productDescription" name="productDescription" required placeholder="Describe the product features, materials, and benefits..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="productImage">Image URL (Optional)</label>
+            <input type="url" id="productImage" name="productImage" placeholder="https://example.com/bottle-image.jpg">
+            <p class="form-note" style="text-align: left; margin-top: 8px;">Leave empty to use a default bottle image. You can use free images from unsplash.com</p>
+          </div>
+
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="productFeatured" name="productFeatured" style="width: auto;">
+              Show on homepage (Featured)
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary form-submit">Add Product to Shop</button>
+        </form>
+
+        <div class="products-list">
+          <h3>Your Custom Products</h3>
+          <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
+            Products you add here appear in the shop instantly. Default products are built-in and cannot be removed from this page.
+            To edit default products permanently, update <code style="color: var(--gold-light);">js/products.js</code>.
+          </p>
+          <div id="custom-products-list">
+            <!-- Loaded by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="index.html" class="logo">VELORA</a>
+          <p>Premium bottles for those who value quality, design, and sustainability in every sip.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Shop</h4>
+          <ul>
+            <li><a href="products.html">All Products</a></li>
+            <li><a href="order.html">Place Order</a></li>
+            <li><a href="add-product.html">Add Product</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="about.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul>
+            <li><a href="contact.html">Help Center</a></li>
+            <li><a href="order.html">Track Order</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Velora. All rights reserved.</p>
+        <p>Premium Bottles, Elevated Living</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/products.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
