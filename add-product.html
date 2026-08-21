@@ -18,8 +18,8 @@
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
         <!-- <li><a href="order.html">Order</a></li>
-        <li><a href="add-product.html">Add Product</a></li>
-      </ul> -->
+        <li><a href="add-product.html">Add Product</a></li> -->
+      </ul>
       <button class="nav-toggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
@@ -43,19 +43,13 @@
           <a href="products.html" class="btn btn-ghost">View Shop</a>
         </div>
 
-        <form id="add-product-form">
+        <form id="add-product-form" enctype="multipart/form-data">
+          <!-- Basic Info -->
           <div class="form-row">
             <div class="form-group">
               <label for="productName">Product Name <span class="required">*</span></label>
               <input type="text" id="productName" name="productName" required placeholder="e.g. Velora Pro 500ml">
             </div>
-            <div class="form-group">
-              <label for="productPrice">Price (₹) <span class="required">*</span></label>
-              <input type="number" id="productPrice" name="productPrice" required min="1" placeholder="e.g. 1999">
-            </div>
-          </div>
-
-          <div class="form-row">
             <div class="form-group">
               <label for="productCategory">Category <span class="required">*</span></label>
               <input type="text" id="productCategory" name="productCategory" required placeholder="e.g. Premium, Travel, Eco" list="category-suggestions">
@@ -68,21 +62,83 @@
                 <option value="Professional">
               </datalist>
             </div>
+          </div>
+
+          <!-- Pricing & Stock -->
+          <div class="form-row">
             <div class="form-group">
-              <label for="productBadge">Badge (Optional)</label>
-              <input type="text" id="productBadge" name="productBadge" placeholder="e.g. New, Bestseller, Limited">
+              <label for="productPrice">Selling Price (₹) <span class="required">*</span></label>
+              <input type="number" id="productPrice" name="productPrice" required min="1" placeholder="e.g. 2499">
+            </div>
+            <div class="form-group">
+              <label for="productMrp">Original Price / MRP (₹)</label>
+              <input type="number" id="productMrp" name="productMrp" min="1" placeholder="e.g. 2874">
             </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productBadge">Badge (Optional)</label>
+              <input type="text" id="productBadge" name="productBadge" placeholder="e.g. BESTSELLER, NEW, LIMITED">
+            </div>
+            <div class="form-group">
+              <label for="productAvailability">Availability Status <span class="required">*</span></label>
+              <input type="text" id="productAvailability" name="productAvailability" required placeholder="e.g. In Stock, Out of Stock" value="In Stock">
+            </div>
+          </div>
+
+          <!-- Specifications -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productCapacity">Capacity <span class="required">*</span></label>
+              <input type="text" id="productCapacity" name="productCapacity" required placeholder="e.g. 750ml, 1000ml">
+            </div>
+            <div class="form-group">
+              <label for="productMaterial">Material</label>
+              <input type="text" id="productMaterial" name="productMaterial" placeholder="e.g. Premium Grade Stainless Steel">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productInsulation">Insulation Performance</label>
+              <input type="text" id="productInsulation" name="productInsulation" placeholder="e.g. Up to 24 hours cold / 12 hours hot">
+            </div>
+            <div class="form-group">
+              <label for="productOrigin">Country of Origin</label>
+              <input type="text" id="productOrigin" name="productOrigin" placeholder="e.g. Crafted in India">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="productWarranty">Warranty</label>
+            <input type="text" id="productWarranty" name="productWarranty" placeholder="e.g. 1 Year Manufacturer Warranty">
+          </div>
+
+          <!-- Description -->
           <div class="form-group">
             <label for="productDescription">Description <span class="required">*</span></label>
             <textarea id="productDescription" name="productDescription" required placeholder="Describe the product features, materials, and benefits..."></textarea>
           </div>
 
+          <!-- 3 Product Images (Max 1MB each) -->
+          <div class="form-row">
+            <div class="form-group">
+              <label for="primaryImage">Primary Image (Front) <span class="required">*</span></label>
+              <input type="file" id="primaryImage" name="primaryImage" accept="image/jpeg,image/png,image/webp" required>
+              <p class="form-note" style="text-align: left; margin-top: 4px;">Main display image (Max 1MB, .jpg, .png, .webp)</p>
+            </div>
+            <div class="form-group">
+              <label for="galleryImage1">Gallery Image 2</label>
+              <input type="file" id="galleryImage1" name="galleryImage1" accept="image/jpeg,image/png,image/webp">
+              <p class="form-note" style="text-align: left; margin-top: 4px;">Angle/context shot (Max 1MB)</p>
+            </div>
+          </div>
+
           <div class="form-group">
-            <label for="productImage">Image URL (Optional)</label>
-            <input type="url" id="productImage" name="productImage" placeholder="https://example.com/bottle-image.jpg">
-            <p class="form-note" style="text-align: left; margin-top: 8px;">Leave empty to use a default bottle image. You can use free images from unsplash.com</p>
+            <label for="galleryImage2">Gallery Image 3</label>
+            <input type="file" id="galleryImage2" name="galleryImage2" accept="image/jpeg,image/png,image/webp">
+            <p class="form-note" style="text-align: left; margin-top: 4px;">Detail/lifestyle shot (Max 1MB)</p>
           </div>
 
           <div class="form-group">
@@ -99,7 +155,7 @@
           <h3>Your Custom Products</h3>
           <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
             Products you add here appear in the shop instantly. Default products are built-in and cannot be removed from this page.
-            To edit default products permanently, update <code style="color: var(--gold-light);">js/products.js</code>.
+            To edit default products permanently, update <code style="color: var(--gold-light);">js/products.js</code>[cite: 2].
           </p>
           <div id="custom-products-list">
             <!-- Loaded by JavaScript -->
@@ -150,5 +206,22 @@
   <script src="js/products.js"></script>
   <script src="js/main.js"></script>
   <script src="js/admin.js"></script>
+  
+  <script>
+    // Client-side validation to enforce < 1MB limit for uploads
+    const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+    const fileInputs = document.querySelectorAll('input[type="file"]');
+
+    fileInputs.forEach(input => {
+      input.addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+          if (this.files[0].size > MAX_FILE_SIZE) {
+            alert(`"${this.files[0].name}" exceeds the 1MB file limit. Please choose a smaller image.`);
+            this.value = '';
+          }
+        }
+      });
+    });
+  </script>
 </body>
 </html>
