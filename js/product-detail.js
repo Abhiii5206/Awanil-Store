@@ -1,245 +1,175 @@
-/**
- * Product detail page — Flipkart / Amazon style layout
- */
+document.addEventListener('DOMContentLoaded', async () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const productId = urlParams.get('id');
 
-document.addEventListener('DOMContentLoaded', () => {
-  initProductDetailPage();
+  if (!productId) {
+    window.location.href = 'products.html';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/products`);
+    const result = await res.json();
+
+    if (!result.success || !Array.isArray(result.data)) return;
+
+    const product = result.data.find(p => p._id === productId || p.id === productId);
+    if (!product) return;
+
+    // 1. Title, Category & Badges
+    document.title = `${product.name} — Awanil Store`;
+    
+    const titleEl = document.getElementById('detail-title');
+    if (titleEl) titleEl.textContent = product.name;
+
+    const categoryEl = document.getElementById('detail-category');
+    if (categoryEl) categoryEl.textContent = product.category || 'Premium';
+
+    const badgesContainer = document.getElementById('detail-badges');
+    if (badgesContainer) {
+      badgesContainer.innerHTML = product.badge ? `<span class="badge">${product.badge}</span>` : '';
+    }
+
+    // 2. Breadcrumbs
+    const breadcrumbEl = document.getElementById('breadcrumb');
+    if (breadcrumbEl) {
+      breadcrumbEl.innerHTML = `
+        <a href="index.html">Home</a> &rsaquo;
+        <a href="products.html">Shop</a> &rsaquo;
+        <span>${product.name}</span>
+      `;
+    }
+
+    // 3. Pricing & Discounts
+    const priceEl = document.getElementById('detail-price');
+    if (priceEl) priceEl.textContent = `${CONFIG.currency || '₹'}${Number(product.price).toLocaleString('en-IN')}`;
+
+    const mrpEl = document.getElementById('detail-mrp');
+    const discountEl = document.querySelector('.detail-discount');
+    if (product.mrp && product.mrp > product.price) {
+      if (mrpEl) mrpEl.textContent = `${CONFIG.currency || '₹'}${Number(product.mrp).toLocaleString('en-IN')}`;
+      if (discountEl) {
+        const discountPercent = Math.round(((product.mrp - product.price) / product.mrp) * 100);
+        discountEl.textContent = `${discountPercent}% off`;
+        discountEl.style.display = 'inline-block';
+      }
+    } else {
+      const mrpContainer = document.querySelector('.detail-mrp');
+      if (mrpContainer) mrpContainer.style.display = 'none';
+      if (discountEl) discountEl.style.display = 'none';
+    }
+
+    // 4. Descriptions
+    const shortDescEl = document.getElementById('detail-short-desc');
+    if (shortDescEl) shortDescEl.textContent = product.description || '';
+
+    const fullDescEl = document.getElementById('detail-full-desc');
+    if (fullDescEl) fullDescEl.textContent = product.description || 'Premium craftsmanship and durable design for everyday hydration.';
+
+    // 5. Stock & Capacity Options
+    const capacityEl = document.getElementById('detail-capacity');
+    if (capacityEl) capacityEl.textContent = product.capacity || '750ml';
+
+    const stockEl = document.getElementById('detail-stock');
+    if (stockEl) {
+      stockEl.textContent = product.availability || 'In Stock';
+      if ((product.availability || '').toLowerCase().includes('out')) {
+        stockEl.className = 'stock-out';
+      } else {
+        stockEl.className = 'stock-in';
+      }
+    }
+
+    // 6. Primary Image & Thumbnails Gallery
+    const fallbackImg = 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
+    const mainImg = document.getElementById('detail-main-image');
+    
+    const primaryImgUrl = product.images?.primaryImage ? `${CONFIG.UPLOADS_URL}${product.images.primaryImage}` : fallbackImg;
+    if (mainImg) mainImg.src = primaryImgUrl;
+
+    const thumbsContainer = document.getElementById('detail-thumbnails');
+    if (thumbsContainer) {
+      thumbsContainer.innerHTML = '';
+      const imageList = [];
+      if (product.images?.primaryImage) imageList.push(`${CONFIG.UPLOADS_URL}${product.images.primaryImage}`);
+      if (product.images?.galleryImage1) imageList.push(`${CONFIG.UPLOADS_URL}${product.images.galleryImage1}`);
+      if (product.images?.galleryImage2) imageList.push(`${CONFIG.UPLOADS_URL}${product.images.galleryImage2}`);
+
+      if (imageList.length === 0) imageList.push(fallbackImg);
+
+      imageList.forEach((imgSrc, idx) => {
+        const thumb = document.createElement('img');
+        thumb.src = imgSrc;
+        thumb.className = idx === 0 ? 'detail-thumb active' : 'detail-thumb';
+        thumb.style = 'width: 70px; height: 70px; object-fit: contain; background: rgba(0,0,0,0.2); padding: 5px; border-radius: 8px; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);';
+        
+        thumb.addEventListener('click', () => {
+          if (mainImg) mainImg.src = imgSrc;
+          document.querySelectorAll('.detail-thumb').forEach(t => t.style.borderColor = 'rgba(255,255,255,0.1)');
+          thumb.style.borderColor = 'var(--gold-light, #d4af37)';
+        });
+
+        thumbsContainer.appendChild(thumb);
+      });
+    }
+
+    // 7. Specifications Tab Table
+    const specsTable = document.getElementById('detail-specs-table');
+    if (specsTable) {
+      specsTable.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-top: 10px;">
+          ${product.capacity ? `<div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;"><strong style="color: var(--gold-light);">Capacity:</strong><p style="margin: 4px 0 0; color: #fff;">${product.capacity}</p></div>` : ''}
+          ${product.material ? `<div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;"><strong style="color: var(--gold-light);">Material:</strong><p style="margin: 4px 0 0; color: #fff;">${product.material}</p></div>` : ''}
+          ${product.insulation ? `<div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;"><strong style="color: var(--gold-light);">Insulation:</strong><p style="margin: 4px 0 0; color: #fff;">${product.insulation}</p></div>` : ''}
+          ${product.origin ? `<div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;"><strong style="color: var(--gold-light);">Origin:</strong><p style="margin: 4px 0 0; color: #fff;">${product.origin}</p></div>` : ''}
+          ${product.warranty ? `<div style="padding: 10px; background: rgba(255,255,255,0.03); border-radius: 6px;"><strong style="color: var(--gold-light);">Warranty:</strong><p style="margin: 4px 0 0; color: #fff;">${product.warranty}</p></div>` : ''}
+        </div>
+      `;
+    }
+
+    // 8. Dynamic Flipkart / Direct Order Action Buttons
+    const buyBtn = document.getElementById('detail-buy-btn');
+    const orderBtn = document.getElementById('detail-order-btn');
+
+    if (product.buyLink) {
+      if (buyBtn) {
+        buyBtn.textContent = 'Buy on Flipkart';
+        buyBtn.href = product.buyLink;
+        buyBtn.target = '_blank';
+        buyBtn.rel = 'noopener noreferrer';
+      }
+      if (orderBtn) {
+        orderBtn.style.display = 'none'; // Marketplace product ke liye secondary button hide karein
+      }
+    } else {
+      if (buyBtn) {
+        buyBtn.textContent = 'Buy Now';
+        buyBtn.href = `order.html?product=${product._id}`;
+      }
+      if (orderBtn) {
+        orderBtn.href = `order.html?product=${product._id}`;
+      }
+    }
+
+    // 9. Quantity Buttons Setup
+    const qtyInput = document.getElementById('detail-quantity');
+    const minusBtn = document.getElementById('qty-minus');
+    const plusBtn = document.getElementById('qty-plus');
+
+    if (plusBtn && qtyInput) {
+      plusBtn.addEventListener('click', () => {
+        qtyInput.value = parseInt(qtyInput.value || 1) + 1;
+      });
+    }
+    if (minusBtn && qtyInput) {
+      minusBtn.addEventListener('click', () => {
+        if (parseInt(qtyInput.value) > 1) {
+          qtyInput.value = parseInt(qtyInput.value) - 1;
+        }
+      });
+    }
+
+  } catch (error) {
+    console.error('Failed to load product details:', error);
+  }
 });
-
-function initProductDetailPage() {
-  const productId = getUrlParam('id');
-  const product = productId ? enrichProduct(getProductById(productId)) : null;
-
-  if (!product) {
-    showProductNotFound();
-    return;
-  }
-
-  document.title = `${product.name} — Velora`;
-  renderBreadcrumb(product);
-  renderProductGallery(product);
-  renderProductInfo(product);
-  renderProductTabs(product);
-  renderRelatedProducts(product.id);
-  renderSimilarProducts(product.id);
-  initGalleryControls();
-  initQuantityControls(product);
-  initDetail3DEffect();
-}
-
-function showProductNotFound() {
-  document.getElementById('product-detail-root').innerHTML = `
-    <div class="container product-not-found">
-      <h1>Product Not Found</h1>
-      <p>The product you're looking for doesn't exist or may have been removed.</p>
-      <a href="products.html" class="btn btn-primary">Browse All Products</a>
-    </div>
-  `;
-}
-
-function renderBreadcrumb(product) {
-  const el = document.getElementById('breadcrumb');
-  if (!el) return;
-
-  el.innerHTML = `
-    <a href="index.html">Home</a>
-    <span class="breadcrumb-sep">/</span>
-    <a href="products.html">Shop</a>
-    <span class="breadcrumb-sep">/</span>
-    <a href="products.html?category=${encodeURIComponent(product.category)}">${product.category}</a>
-    <span class="breadcrumb-sep">/</span>
-    <span class="breadcrumb-current">${product.name}</span>
-  `;
-}
-
-function renderProductGallery(product) {
-  const mainImage = document.getElementById('detail-main-image');
-  const thumbs = document.getElementById('detail-thumbnails');
-  if (!mainImage || !thumbs) return;
-
-  const images = getProductImages(product);
-  mainImage.src = images[0];
-  mainImage.alt = product.name;
-
-  thumbs.innerHTML = images
-    .map(
-      (img, index) => `
-      <button type="button" class="detail-thumb${index === 0 ? ' active' : ''}" data-image="${img}" aria-label="View image ${index + 1}">
-        <img src="${img}" alt="${product.name} view ${index + 1}"
-             onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
-      </button>
-    `
-    )
-    .join('');
-}
-
-function renderProductInfo(product) {
-  const badge = product.badge
-    ? `<span class="detail-badge">${product.badge}</span>`
-    : '';
-
-  const stars = renderStars(product.rating);
-
-  document.getElementById('detail-category').textContent = product.category;
-  document.getElementById('detail-title').textContent = product.name;
-  document.getElementById('detail-badges').innerHTML = badge;
-  document.getElementById('detail-rating').innerHTML = `
-    ${stars}
-    <span class="detail-rating-text">${product.rating} · ${product.reviewCount} reviews</span>
-  `;
-  document.getElementById('detail-price').textContent = formatPrice(product.price);
-  document.getElementById('detail-mrp').textContent = formatPrice(Math.round(product.price * 1.15));
-  document.getElementById('detail-short-desc').textContent = product.description;
-
-  document.getElementById('detail-capacity').textContent = product.capacity;
-  document.getElementById('detail-stock').textContent = product.inStock ? 'In Stock' : 'Out of Stock';
-  document.getElementById('detail-stock').className = product.inStock ? 'stock-in' : 'stock-out';
-
-  const orderBtn = document.getElementById('detail-order-btn');
-  const buyBtn = document.getElementById('detail-buy-btn');
-  const orderUrl = `order.html?product=${product.id}`;
-
-  orderBtn.href = orderUrl;
-  buyBtn.href = orderUrl;
-
-  document.getElementById('detail-features-list').innerHTML = product.features
-    .map(f => `<li>${f}</li>`)
-    .join('');
-}
-
-function renderProductTabs(product) {
-  document.getElementById('detail-full-desc').textContent = product.description;
-
-  const specsEl = document.getElementById('detail-specs-table');
-  specsEl.innerHTML = Object.entries(product.specs)
-    .map(
-      ([key, value]) => `
-      <div class="spec-row">
-        <span class="spec-label">${key}</span>
-        <span class="spec-value">${value}</span>
-      </div>
-    `
-    )
-    .join('');
-}
-
-function renderRelatedProducts(productId) {
-  const container = document.getElementById('related-products');
-  const products = getRelatedProducts(productId, 4);
-  renderProductSection(container, products, 'related-empty');
-}
-
-function renderSimilarProducts(productId) {
-  const container = document.getElementById('similar-products');
-  const products = getSimilarProducts(productId, 4);
-  renderProductSection(container, products, 'similar-empty');
-}
-
-function renderProductSection(container, products, emptyId) {
-  if (!container) return;
-
-  const emptyEl = document.getElementById(emptyId);
-  if (products.length === 0) {
-    container.innerHTML = '';
-    if (emptyEl) emptyEl.style.display = 'block';
-    return;
-  }
-
-  if (emptyEl) emptyEl.style.display = 'none';
-  container.innerHTML = products.map(p => renderProductCard(p, { compact: true })).join('');
-  initScrollEffects();
-}
-
-function renderStars(rating) {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  let html = '<span class="detail-stars">';
-
-  for (let i = 0; i < 5; i++) {
-    if (i < full) html += '&#9733;';
-    else if (i === full && half) html += '&#9733;';
-    else html += '<span class="star-empty">&#9733;</span>';
-  }
-
-  html += '</span>';
-  return html;
-}
-
-function initGalleryControls() {
-  const mainImage = document.getElementById('detail-main-image');
-  const thumbs = document.querySelectorAll('.detail-thumb');
-
-  thumbs.forEach(thumb => {
-    thumb.addEventListener('click', () => {
-      thumbs.forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      mainImage.src = thumb.dataset.image;
-      mainImage.style.opacity = '0';
-      setTimeout(() => {
-        mainImage.style.opacity = '1';
-      }, 50);
-    });
-  });
-}
-
-function initQuantityControls(product) {
-  const qtyInput = document.getElementById('detail-quantity');
-  const minusBtn = document.getElementById('qty-minus');
-  const plusBtn = document.getElementById('qty-plus');
-  const orderBtn = document.getElementById('detail-order-btn');
-  const buyBtn = document.getElementById('detail-buy-btn');
-
-  if (!qtyInput) return;
-
-  function updateLinks() {
-    const qty = qtyInput.value;
-    const url = `order.html?product=${product.id}&quantity=${qty}`;
-    orderBtn.href = url;
-    buyBtn.href = url;
-  }
-
-  minusBtn?.addEventListener('click', () => {
-    const val = parseInt(qtyInput.value) || 1;
-    if (val > 1) qtyInput.value = val - 1;
-    updateLinks();
-  });
-
-  plusBtn?.addEventListener('click', () => {
-    const val = parseInt(qtyInput.value) || 1;
-    if (val < 99) qtyInput.value = val + 1;
-    updateLinks();
-  });
-
-  qtyInput.addEventListener('change', () => {
-    let val = parseInt(qtyInput.value) || 1;
-    val = Math.max(1, Math.min(99, val));
-    qtyInput.value = val;
-    updateLinks();
-  });
-
-  document.querySelectorAll('.detail-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.detail-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.detail-tab-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.tab)?.classList.add('active');
-    });
-  });
-}
-
-function initDetail3DEffect() {
-  const gallery = document.querySelector('.detail-gallery-main');
-  const image = document.getElementById('detail-main-image');
-  if (!gallery || !image) return;
-
-  gallery.addEventListener('mousemove', e => {
-    const rect = gallery.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    image.style.transform = `scale(1.05) rotateY(${x * 8}deg) rotateX(${-y * 8}deg)`;
-  });
-
-  gallery.addEventListener('mouseleave', () => {
-    image.style.transform = 'scale(1) rotateY(0deg) rotateX(0deg)';
-  });
-}
