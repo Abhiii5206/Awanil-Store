@@ -101,17 +101,6 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="productInsulation">Insulation Performance</label>
-              <input type="text" id="productInsulation" name="productInsulation" placeholder="e.g. Up to 24 hours cold / 12 hours hot">
-            </div>
-            <div class="form-group">
-              <label for="productWarranty">Warranty</label>
-              <input type="text" id="productWarranty" name="productWarranty" placeholder="e.g. 1 Year Manufacturer Warranty">
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
               <label for="productOrigin">Country of Origin</label>
               <input type="text" id="productOrigin" name="productOrigin" placeholder="e.g. Crafted in India">
             </div>
@@ -130,7 +119,7 @@
             </div>
           </div>
 
-          <!-- Dynamic Manual Color Input (Revealed only when 'Other' is chosen) -->
+          <!-- Dynamic Manual Color Input (Shown only when 'Other' is picked) -->
           <div class="form-group" id="manualColorGroup" style="display: none; margin-bottom: 20px;">
             <label for="customColor" style="color: var(--gold-light);">Custom Color Name <span class="required">*</span></label>
             <input type="text" id="customColor" name="customColor" placeholder="e.g. Sunset Amber, Champagne Gold" style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
@@ -185,7 +174,7 @@
           <button type="submit" class="btn btn-primary form-submit">Add Product to Shop</button>
         </form>
 
-        <!-- Hidden container prevents JavaScript errors if js/admin.js expects this target -->
+        <!-- Hidden anchor container to preserve script compatibility -->
         <div id="custom-products-list" style="display: none;"></div>
       </div>
     </div>
@@ -234,7 +223,6 @@
   <script src="js/admin.js"></script>
   
   <script>
-    // Toggle manual color field when 'Other' is selected
     function toggleManualColor(selectElem) {
       const manualGroup = document.getElementById('manualColorGroup');
       const customInput = document.getElementById('customColor');
@@ -250,8 +238,7 @@
       }
     }
 
-    // Client-side validation to enforce < 1MB limit for uploads
-    const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
+    const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB limit
     const fileInputs = document.querySelectorAll('input[type="file"]');
 
     fileInputs.forEach(input => {
