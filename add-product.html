@@ -17,8 +17,8 @@
         <li><a href="products.html">Shop</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <!-- <li><a href="order.html">Order</a></li>
-        <li><a href="add-product.html">Add Product</a></li> -->
+        <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li>
       </ul>
       <button class="nav-toggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -105,14 +105,35 @@
               <input type="text" id="productInsulation" name="productInsulation" placeholder="e.g. Up to 24 hours cold / 12 hours hot">
             </div>
             <div class="form-group">
-              <label for="productOrigin">Country of Origin</label>
-              <input type="text" id="productOrigin" name="productOrigin" placeholder="e.g. Crafted in India">
+              <label for="productWarranty">Warranty</label>
+              <input type="text" id="productWarranty" name="productWarranty" placeholder="e.g. 1 Year Manufacturer Warranty">
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="productWarranty">Warranty</label>
-            <input type="text" id="productWarranty" name="productWarranty" placeholder="e.g. 1 Year Manufacturer Warranty">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="productOrigin">Country of Origin</label>
+              <input type="text" id="productOrigin" name="productOrigin" placeholder="e.g. Crafted in India">
+            </div>
+            <div class="form-group">
+              <label for="productColor">Color <span class="required">*</span></label>
+              <select id="productColor" name="productColor" required onchange="toggleManualColor(this)" style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
+                <option value="" disabled selected style="background: #1b1b1b; color: #fff;">-- Select Color --</option>
+                <option value="Matte Black" style="background: #1b1b1b; color: #fff;">Matte Black</option>
+                <option value="Classic Silver" style="background: #1b1b1b; color: #fff;">Classic Silver</option>
+                <option value="Midnight Blue" style="background: #1b1b1b; color: #fff;">Midnight Blue</option>
+                <option value="Rose Gold" style="background: #1b1b1b; color: #fff;">Rose Gold</option>
+                <option value="Emerald Green" style="background: #1b1b1b; color: #fff;">Emerald Green</option>
+                <option value="Pure White" style="background: #1b1b1b; color: #fff;">Pure White</option>
+                <option value="Other" style="background: #1b1b1b; color: #fff;">Other (Enter Manually)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Manual Color Input (Revealed only when 'Other' is chosen) -->
+          <div class="form-group" id="manualColorGroup" style="display: none; margin-bottom: 20px;">
+            <label for="customColor" style="color: var(--gold-light);">Custom Color Name <span class="required">*</span></label>
+            <input type="text" id="customColor" name="customColor" placeholder="e.g. Sunset Amber, Champagne Gold" style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;">
           </div>
 
           <!-- Description -->
@@ -121,7 +142,7 @@
             <textarea id="productDescription" name="productDescription" required placeholder="Describe the product features, materials, and benefits..."></textarea>
           </div>
 
-          <!-- 3 Product Images (Max 1MB each) -->
+          <!-- Product Images (Max 1MB each) -->
           <div class="form-row">
             <div class="form-group">
               <label for="primaryImage">Primary Image (Front) <span class="required">*</span></label>
@@ -147,32 +168,25 @@
               Show on homepage (Featured)
             </label>
           </div>
+
           <div class="form-group" style="margin-bottom: 20px;">
-  <label for="buyLink" style="display: block; color: var(--gold-light); margin-bottom: 8px;">
-    🛒 Flipkart / Buy Now Link (Optional)
-  </label>
-  <input 
-    type="url" 
-    id="buyLink" 
-    name="buyLink" 
-    placeholder="https://www.flipkart.com/product/..." 
-    style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;"
-  />
-</div>
+            <label for="buyLink" style="display: block; color: var(--gold-light); margin-bottom: 8px;">
+              🛒 Flipkart / Buy Now Link (Optional)
+            </label>
+            <input 
+              type="url" 
+              id="buyLink" 
+              name="buyLink" 
+              placeholder="https://www.flipkart.com/product/..." 
+              style="width: 100%; padding: 12px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff;"
+            />
+          </div>
 
           <button type="submit" class="btn btn-primary form-submit">Add Product to Shop</button>
         </form>
 
-        <div class="products-list">
-          <h3>Your Custom Products</h3>
-          <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;">
-            Products you add here appear in the shop instantly. Default products are built-in and cannot be removed from this page.
-            To edit default products permanently, update <code style="color: var(--gold-light);">js/products.js</code>[cite: 2].
-          </p>
-          <div id="custom-products-list">
-            <!-- Loaded by JavaScript -->
-          </div>
-        </div>
+        <!-- Hidden container prevents JavaScript errors if js/admin.js expects this target -->
+        <div id="custom-products-list" style="display: none;"></div>
       </div>
     </div>
   </section>
@@ -220,6 +234,22 @@
   <script src="js/admin.js"></script>
   
   <script>
+    // Toggle manual color field when 'Other' is selected
+    function toggleManualColor(selectElem) {
+      const manualGroup = document.getElementById('manualColorGroup');
+      const customInput = document.getElementById('customColor');
+      
+      if (selectElem.value === 'Other') {
+        manualGroup.style.display = 'block';
+        customInput.required = true;
+        customInput.focus();
+      } else {
+        manualGroup.style.display = 'none';
+        customInput.required = false;
+        customInput.value = '';
+      }
+    }
+
     // Client-side validation to enforce < 1MB limit for uploads
     const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB in bytes
     const fileInputs = document.querySelectorAll('input[type="file"]');
