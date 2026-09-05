@@ -1,171 +1,143 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Shop all premium Velora bottles — luxury hydration for every lifestyle.">
-  <title>Shop — Velora</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+/**
+ * Admin Panel: Add, Fetch & Delete products via Live Cloud Backend (Render + MongoDB Atlas)
+ */
 
-  <nav class="navbar">
-    <div class="container nav-inner">
-      <a href="index.html" class="logo">Awanil Store</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="products.html">Shop</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <!-- <li><a href="order.html">Order</a></li> -->
-        <!-- <li><a href="add-product.html">Add Product</a></li> -->
-      </ul>
-      <button class="nav-toggle" aria-label="Toggle menu">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+document.addEventListener('DOMContentLoaded', () => {
+  initAddProductForm();
+  renderAdminProductList();
+});
 
-  <header class="page-header">
-    <div class="container">
-      <h1>Our Collection</h1>
-      <p>Explore our full range of premium bottles — crafted for quality, designed for you.</p>
-    </div>
-  </header>
+// 1. Add New Product Handler
+function initAddProductForm() {
+  const form = document.getElementById('add-product-form');
+  const alertBox = document.getElementById('admin-alert');
+  if (!form) return;
 
-  <section>
-    <div class="container">
-      <div class="filter-bar" id="category-filters">
-        <button class="filter-btn active" data-category="all">All</button>
-        <!-- Category buttons loaded by JS -->
-      </div>
-      <div class="products-grid" id="all-products">
-        <!-- Loaded by JavaScript -->
-      </div>
-    </div>
-  </section>
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-  <footer class="footer">
-    <div class="container">
-      <div class="footer-grid">
-        <div class="footer-brand">
-          <a href="index.html" class="logo">VELORA</a>
-          <p>Premium bottles for those who value quality, design, and sustainability in every sip.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Shop</h4>
-          <ul>
-            <li><a href="products.html">All Products</a></li>
-            <li><a href="order.html">Place Order</a></li>
-            <li><a href="add-product.html">Add Product</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="about.html">About Us</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="contact.html">Help Center</a></li>
-            <li><a href="order.html">Track Order</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 Velora. All rights reserved.</p>
-        <p>Premium Bottles, Elevated Living</p>
-      </div>
-    </div>
-  </footer>
+    if (alertBox) {
+      alertBox.textContent = 'Uploading product and images to cloud...';
+      alertBox.style.display = 'block';
+      alertBox.style.color = 'var(--gold-light, #d4af37)';
+    }
 
-  <script src="js/config.js"></script>
-  <script src="js/products.js"></script>
-  <script src="js/main.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const productsContainer = document.getElementById('all-products');
-      const filtersContainer = document.getElementById('category-filters');
+    const formData = new FormData(form);
 
-      productsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center;">Loading store catalog...</p>';
-
-      const products = await fetchAllLiveProducts();
-
-      if (!products || products.length === 0) {
-        productsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center;">No products available right now.</p>';
-        return;
-      }
-
-      // Generate category filter buttons dynamically
-      const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
-      categories.forEach(cat => {
-        const btn = document.createElement('button');
-        btn.className = 'filter-btn';
-        btn.dataset.category = cat;
-        btn.textContent = cat;
-        filtersContainer.appendChild(btn);
+    try {
+      const response = await fetch(`${CONFIG.API_BASE_URL}/products`, {
+        method: 'POST',
+        body: formData
       });
 
-      // Render cards function
-      function renderCards(list) {
-        productsContainer.innerHTML = '';
-        if (list.length === 0) {
-          productsContainer.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center;">No products in this category.</p>';
-          return;
-        }
+      const result = await response.json();
 
-        list.forEach(p => {
-          const imgUrl = p.images?.primaryImage 
+      if (response.ok && result.success) {
+        if (alertBox) {
+          alertBox.textContent = `✅ "${result.data?.name || 'Product'}" added successfully to MongoDB Atlas!`;
+          alertBox.style.color = '#4ade80';
+        }
+        form.reset();
+        renderAdminProductList();
+      } else {
+        if (alertBox) {
+          alertBox.textContent = `❌ ${result.message || 'Failed to add product.'}`;
+          alertBox.style.color = '#f87171';
+        }
+      }
+    } catch (error) {
+      console.error('Submit error:', error);
+      if (alertBox) {
+        alertBox.textContent = '❌ Cloud connection failed. Please check internet connection.';
+        alertBox.style.color = '#f87171';
+      }
+    }
+  });
+}
+
+// 2. Fetch & Render Products with "Remove" Button
+async function renderAdminProductList() {
+  const container = document.getElementById('custom-products-list');
+  if (!container) return;
+
+  container.innerHTML = '<p style="color: var(--text-muted); padding: 10px 0;">Loading live products from database...</p>';
+
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/products`);
+    const data = await res.json();
+
+    if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+      container.innerHTML = data.data
+        .map(p => {
+          const imgUrl = p.images && p.images.primaryImage 
             ? `${CONFIG.UPLOADS_URL}${p.images.primaryImage}` 
             : 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
 
-          const buyButton = p.buyLink 
-            ? `<a href="${p.buyLink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Flipkart</a>`
-            : `<a href="order.html?product=${p._id}" class="btn btn-primary">Buy Now</a>`;
-
-          const card = document.createElement('div');
-          card.className = 'product-card';
-          card.innerHTML = `
-            ${p.badge ? `<span class="badge" style="position: absolute; top: 8px; left: 8px; font-size: 0.65rem; padding: 2px 6px;">${p.badge}</span>` : ''}
-            <div class="product-thumb">
-              <a href="product-detail.html?id=${p._id}">
-                <img src="${imgUrl}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
-              </a>
-            </div>
-            <div class="product-info">
-              <span class="category">${p.category || 'Bottle'}</span>
-              <h3 class="product-title"><a href="product-detail.html?id=${p._id}">${p.name}</a></h3>
-              <div class="product-pricing">
-                <span class="current-price">${CONFIG.currency || '₹'}${Number(p.price).toLocaleString('en-IN')}</span>
-                ${p.mrp ? `<span class="original-price">${CONFIG.currency || '₹'}${Number(p.mrp).toLocaleString('en-IN')}</span>` : ''}
+          return `
+            <div class="admin-product-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); margin-bottom: 8px; border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 14px;">
+                <img src="${imgUrl}" alt="${p.name}" style="width: 50px; height: 50px; object-fit: contain; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 4px;"
+                     onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
+                <div class="admin-product-info">
+                  <h4 style="margin: 0; color: #fff; font-size: 0.95rem;">${p.name}</h4>
+                  <span style="font-size: 0.8rem; color: var(--gold-light, #d4af37);">
+                    ${CONFIG.currency || '₹'}${Number(p.price).toLocaleString('en-IN')} · ${p.category} ${p.featured ? '· ⭐ Featured' : ''}
+                  </span>
+                  ${p.buyLink ? `<div style="font-size: 0.75rem;"><a href="${p.buyLink}" target="_blank" style="color: #60a5fa; text-decoration: underline;">Flipkart Link</a></div>` : ''}
+                </div>
               </div>
-              <div class="card-buttons">
-                ${buyButton}
-                <a href="product-detail.html?id=${p._id}" class="btn btn-secondary">Details</a>
-              </div>
+              <button onclick="handleDeleteProduct('${p._id}')" style="background: #ef4444; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: background 0.2s ease;">
+                🗑️ Remove
+              </button>
             </div>
           `;
-          productsContainer.appendChild(card);
-        });
-      }
+        })
+        .join('');
+    } else {
+      container.innerHTML = '<p style="color: var(--text-muted); padding: 10px 0;">No products found in cloud database. Add one above.</p>';
+    }
+  } catch (err) {
+    console.error('Error fetching admin products:', err);
+    container.innerHTML = '<p style="color: #f87171;">Failed to load products from backend.</p>';
+  }
+}
 
-      // Initial view
-      renderCards(products);
+// 3. Delete Product Function (Triggers Backend DELETE Route)
+window.handleDeleteProduct = async function(productId) {
+  if (!confirm('Are you sure you want to permanently delete this product from MongoDB Atlas?')) {
+    return;
+  }
 
-      // Filter click handling
-      filtersContainer.addEventListener('click', e => {
-        if (!e.target.classList.contains('filter-btn')) return;
-        filtersContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
+  const alertBox = document.getElementById('admin-alert');
+  if (alertBox) {
+    alertBox.textContent = 'Deleting product from database...';
+    alertBox.style.display = 'block';
+    alertBox.style.color = 'var(--gold-light, #d4af37)';
+  }
 
-        const selectedCat = e.target.dataset.category;
-        const filtered = selectedCat === 'all' ? products : products.filter(p => p.category === selectedCat);
-        renderCards(filtered);
-      });
+  try {
+    const res = await fetch(`${CONFIG.API_BASE_URL}/products/${productId}`, {
+      method: 'DELETE'
     });
-  </script>
-</body>
-</html>
+    const result = await res.json();
+
+    if (res.ok && result.success) {
+      if (alertBox) {
+        alertBox.textContent = '✅ Product deleted successfully from MongoDB Atlas!';
+        alertBox.style.color = '#4ade80';
+      }
+      renderAdminProductList(); // List reload karega
+    } else {
+      if (alertBox) {
+        alertBox.textContent = `❌ ${result.message || 'Failed to delete product.'}`;
+        alertBox.style.color = '#f87171';
+      }
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    if (alertBox) {
+      alertBox.textContent = '❌ Server connection failed. Could not delete.';
+      alertBox.style.color = '#f87171';
+    }
+  }
+};

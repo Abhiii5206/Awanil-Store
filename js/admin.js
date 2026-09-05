@@ -2,6 +2,22 @@
  * Admin Panel: Add, Fetch & Delete products via Live Cloud Backend (Render + MongoDB Atlas)
  */
 
+// Helper: Base64 / Cloud URL / Uploads path resolver
+function getSafeImageUrl(imagePath) {
+  const fallback = 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
+  if (!imagePath) return fallback;
+
+  // Agar direct base64 ya full link (http/https) hai toh seedhe return karein
+  if (imagePath.startsWith('data:') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // Purane local uploads ke liye fallback
+  const cleanBase = (CONFIG.UPLOADS_URL || '').replace(/\/+$/, '');
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `${cleanBase}${cleanPath}`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initAddProductForm();
   renderAdminProductList();
@@ -27,7 +43,7 @@ function initAddProductForm() {
     try {
       const response = await fetch(`${CONFIG.API_BASE_URL}/products`, {
         method: 'POST',
-        body: formData
+        body: formData // Note: Browser automatically sets boundary
       });
 
       const result = await response.json();
@@ -37,8 +53,16 @@ function initAddProductForm() {
           alertBox.textContent = `✅ "${result.data?.name || 'Product'}" added successfully to MongoDB Atlas!`;
           alertBox.style.color = '#4ade80';
         }
+        
         form.reset();
-        renderAdminProductList();
+
+        // Custom color field ko wapas hide aur optional karein
+        const manualColorGroup = document.getElementById('manualColorGroup');
+        const customColorInput = document.getElementById('customColor');
+        if (manualColorGroup) manualColorGroup.style.display = 'none';
+        if (customColorInput) customColorInput.required = false;
+
+        renderAdminProductList(); // List refresh karein
       } else {
         if (alertBox) {
           alertBox.textContent = `❌ ${result.message || 'Failed to add product.'}`;
@@ -60,6 +84,11 @@ async function renderAdminProductList() {
   const container = document.getElementById('custom-products-list');
   if (!container) return;
 
+  // Container visible hona ensure karein
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.gap = '10px';
+
   container.innerHTML = '<p style="color: var(--text-muted); padding: 10px 0;">Loading live products from database...</p>';
 
   try {
@@ -69,24 +98,34 @@ async function renderAdminProductList() {
     if (data.success && Array.isArray(data.data) && data.data.length > 0) {
       container.innerHTML = data.data
         .map(p => {
-          const imgUrl = p.images && p.images.primaryImage 
-            ? `${CONFIG.UPLOADS_URL}${p.images.primaryImage}` 
-            : 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
+          const imgUrl = getSafeImageUrl(p.images?.primaryImage);
 
           return `
-            <div class="admin-product-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); margin-bottom: 8px; border-radius: 8px;">
-              <div style="display: flex; align-items: center; gap: 14px;">
-                <img src="${imgUrl}" alt="${p.name}" style="width: 50px; height: 50px; object-fit: contain; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 4px;"
-                     onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
-                <div class="admin-product-info">
-                  <h4 style="margin: 0; color: #fff; font-size: 0.95rem;">${p.name}</h4>
-                  <span style="font-size: 0.8rem; color: var(--gold-light, #d4af37);">
-                    ${CONFIG.currency || '₹'}${Number(p.price).toLocaleString('en-IN')} · ${p.category} ${p.featured ? '· ⭐ Featured' : ''}
+            <div class="admin-product-item" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.02); border-radius: 8px; gap: 14px;">
+              <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+                <img 
+                  src="${imgUrl}" 
+                  alt="${p.name}" 
+                  style="width: 55px; height: 55px; object-fit: contain; background: rgba(0,0,0,0.3); border-radius: 6px; padding: 4px; flex-shrink: 0;"
+                  onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'"
+                >
+                <div class="admin-product-info" style="min-width: 0;">
+                  <h4 style="margin: 0 0 4px 0; color: #fff; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    ${p.name}
+                  </h4>
+                  <span style="font-size: 0.82rem; color: var(--gold-light, #d4af37);">
+                    ${CONFIG.currency || '₹'}${Number(p.price).toLocaleString('en-IN')} · ${p.category} · <span style="color: #cbd5e1;">${p.color || 'Standard'}</span> ${p.featured ? '· ⭐ Featured' : ''}
                   </span>
-                  ${p.buyLink ? `<div style="font-size: 0.75rem;"><a href="${p.buyLink}" target="_blank" style="color: #60a5fa; text-decoration: underline;">Flipkart Link</a></div>` : ''}
+                  ${p.buyLink ? `<div style="font-size: 0.75rem; margin-top: 2px;"><a href="${p.buyLink}" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline;">Flipkart Link</a></div>` : ''}
                 </div>
               </div>
-              <button onclick="handleDeleteProduct('${p._id}')" style="background: #ef4444; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: background 0.2s ease;">
+              <button 
+                type="button"
+                onclick="handleDeleteProduct('${p._id}', '${p.name.replace(/'/g, "\\'")}')" 
+                style="background: #ef4444; color: #fff; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: opacity 0.2s ease; flex-shrink: 0;"
+                onmouseover="this.style.opacity='0.85'"
+                onmouseout="this.style.opacity='1'"
+              >
                 🗑️ Remove
               </button>
             </div>
@@ -98,13 +137,14 @@ async function renderAdminProductList() {
     }
   } catch (err) {
     console.error('Error fetching admin products:', err);
-    container.innerHTML = '<p style="color: #f87171;">Failed to load products from backend.</p>';
+    container.innerHTML = '<p style="color: #f87171; padding: 10px 0;">Failed to load products from backend.</p>';
   }
 }
 
 // 3. Delete Product Function (Triggers Backend DELETE Route)
-window.handleDeleteProduct = async function(productId) {
-  if (!confirm('Are you sure you want to permanently delete this product from MongoDB Atlas?')) {
+window.handleDeleteProduct = async function(productId, productName) {
+  const displayName = productName ? `"${productName}"` : 'this product';
+  if (!confirm(`Are you sure you want to permanently delete ${displayName} from MongoDB Atlas?`)) {
     return;
   }
 
