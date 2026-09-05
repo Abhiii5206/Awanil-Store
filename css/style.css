@@ -1889,3 +1889,10 @@ section {
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
+
+.detail-tab-panel {
+  display: none;
+}
+.detail-tab-panel.active {
+  display: block;
+}

@@ -4,6 +4,22 @@
 
 let ALL_PRODUCTS_CACHE = [];
 
+// Helper: Image URL ko verify aur format karne ke liye
+function getResolvedImageUrl(imagePath) {
+  const fallbackImage = 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
+  if (!imagePath) return fallbackImage;
+
+  // Agar image Base64 data hai ya complete URL (http/https) hai
+  if (imagePath.startsWith('data:') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath;
+  }
+
+  // Purane local uploads path ke liye fallback
+  const cleanUploadsUrl = (CONFIG.UPLOADS_URL || '').replace(/\/+$/, '');
+  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+  return `${cleanUploadsUrl}${cleanPath}`;
+}
+
 async function fetchAllLiveProducts() {
   try {
     const res = await fetch(`${CONFIG.API_BASE_URL}/products`);
@@ -50,9 +66,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   productsGrid.innerHTML = '';
 
   products.forEach(product => {
-    const imgUrl = product.images && product.images.primaryImage
-      ? `${CONFIG.UPLOADS_URL}${product.images.primaryImage}`
-      : 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
+    // Base64-safe image URL resolver
+    const primaryImg = product.images?.primaryImage || '';
+    const imgUrl = getResolvedImageUrl(primaryImg);
 
     // External buy link handler
     const buyButtonHtml = product.buyLink 
@@ -65,7 +81,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       ${product.badge ? `<span class="badge">${product.badge}</span>` : ''}
       <div class="product-thumb">
         <a href="product-detail.html?id=${product._id}">
-          <img src="${imgUrl}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
+          <img 
+            src="${imgUrl}" 
+            alt="${product.name}" 
+            loading="lazy"
+            onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'"
+          >
         </a>
       </div>
       <div class="product-info">

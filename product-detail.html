@@ -17,8 +17,8 @@
         <li><a href="products.html">Shop</a></li>
         <li><a href="about.html">About</a></li>
         <li><a href="contact.html">Contact</a></li>
-        <!-- <li><a href="order.html">Order</a></li>
-        <li><a href="add-product.html">Add Product</a></li> -->
+        <li><a href="order.html">Order</a></li>
+        <li><a href="add-product.html">Add Product</a></li>
       </ul>
       <button class="nav-toggle" aria-label="Toggle menu">
         <span></span><span></span><span></span>
@@ -58,7 +58,7 @@
             <div class="detail-price-row">
               <span class="detail-price" id="detail-price"></span>
               <span class="detail-mrp">MRP <del id="detail-mrp"></del></span>
-              <span class="detail-discount">15% off</span>
+              <span class="detail-discount"></span>
             </div>
 
             <p class="detail-short-desc" id="detail-short-desc"></p>
@@ -73,10 +73,14 @@
               </div>
 
               <div class="detail-option-row">
+                <span class="detail-option-label">Color</span>
+                <span class="detail-option-value" id="detail-color" style="color: var(--gold-light); font-weight: 500;"></span>
+              </div>
+
+              <div class="detail-option-row">
                 <span class="detail-option-label">Availability</span>
                 <span id="detail-stock" class="stock-in"></span>
               </div>
-
             </div>
 
             <!-- Action Buttons -->
@@ -86,7 +90,6 @@
             </div>
 
             <div class="detail-delivery-info">
-            
               <div class="delivery-item">
                 <span class="delivery-icon">&#128274;</span>
                 <div>
@@ -105,7 +108,7 @@
           </div>
         </div>
 
-        <!-- Description Tabs -->
+        <!-- Description & Specifications Tabs -->
         <div class="detail-tabs reveal">
           <div class="detail-tab-nav">
             <button type="button" class="detail-tab-btn active" data-tab="tab-description">Description</button>
@@ -124,20 +127,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Related Products -->
-    <!-- <section class="product-detail-related">
-      <div class="container">
-        <div class="section-header reveal">
-          <span class="section-label">Related</span>
-          <h2>Related Products</h2>
-          <p>More bottles from the same collection you might like.</p>
-        </div>
-        <p class="section-empty" id="related-empty" style="display: none;">No related products in this category yet.</p>
-        <div class="products-grid" id="related-products"></div>
-      </div>
-      
-    </section> -->
 
     <!-- Similar Products -->
     <section class="product-detail-related" style="background: var(--bg-card);">
