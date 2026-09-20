@@ -1,32 +1,19 @@
 /**
- * Shop Products Catalog: Fetches live data from Render & MongoDB Atlas
+ * Shop Products Catalog: Live fetch from Render & MongoDB Atlas
  */
 
 let ALL_PRODUCTS_CACHE = [];
 
-// Helper: Image URL ko verify aur format karne ke liye
-function getResolvedImageUrl(imagePath) {
-  const fallbackImage = 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
-  if (!imagePath) return fallbackImage;
-
-  // Agar image Base64 data hai ya complete URL (http/https) hai
-  if (imagePath.startsWith('data:') || imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath;
-  }
-
-  // Purane local uploads path ke liye fallback
-  const cleanUploadsUrl = (CONFIG.UPLOADS_URL || '').replace(/\/+$/, '');
-  const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-  return `${cleanUploadsUrl}${cleanPath}`;
-}
-
+// 1. Fetch products from Render API
 async function fetchAllLiveProducts() {
   try {
     const res = await fetch(`${CONFIG.API_BASE_URL}/products`);
-    const data = await res.json();
-    if (data.success) {
-      ALL_PRODUCTS_CACHE = data.data;
-      return data.data;
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    const result = await res.json();
+
+    if (result.success && Array.isArray(result.data)) {
+      ALL_PRODUCTS_CACHE = result.data;
+      return result.data;
     }
     return [];
   } catch (error) {
@@ -35,73 +22,89 @@ async function fetchAllLiveProducts() {
   }
 }
 
-async function getAllProducts() {
-  if (ALL_PRODUCTS_CACHE.length > 0) return ALL_PRODUCTS_CACHE;
-  return await fetchAllLiveProducts();
-}
-
-async function getProductById(id) {
-  const products = await getAllProducts();
-  return products.find(p => p._id === id || p.id === id) || null;
-}
-
-function formatPrice(price) {
-  return `${CONFIG.currency}${Number(price).toLocaleString('en-IN')}`;
-}
-
-// Render dynamic products on the Shop page
-document.addEventListener('DOMContentLoaded', async () => {
-  const productsGrid = document.getElementById('products-grid') || document.querySelector('.products-grid');
-  if (!productsGrid) return;
-
-  productsGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">Loading premium catalog...</p>';
-
-  const products = await fetchAllLiveProducts();
+// 2. Render Cards into Grid
+function renderCards(products, container) {
+  if (!container) return;
 
   if (!products || products.length === 0) {
-    productsGrid.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No products found in store.</p>';
+    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">No products found in this category.</p>';
     return;
   }
 
-  productsGrid.innerHTML = '';
+  container.innerHTML = products.map(product => {
+    const imgUrl = product.images && product.images.primaryImage
+      ? `${CONFIG.UPLOADS_URL}${product.images.primaryImage}`
+      : 'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80';
 
-  products.forEach(product => {
-    // Base64-safe image URL resolver
-    const primaryImg = product.images?.primaryImage || '';
-    const imgUrl = getResolvedImageUrl(primaryImg);
-
-    // External buy link handler
     const buyButtonHtml = product.buyLink 
       ? `<a href="${product.buyLink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="text-align: center; width: 100%;">Buy on Flipkart</a>`
       : `<a href="order.html?product=${product._id}" class="btn btn-primary" style="text-align: center; width: 100%;">Buy Now</a>`;
 
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      ${product.badge ? `<span class="badge">${product.badge}</span>` : ''}
-      <div class="product-thumb">
-        <a href="product-detail.html?id=${product._id}">
-          <img 
-            src="${imgUrl}" 
-            alt="${product.name}" 
-            loading="lazy"
-            onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'"
-          >
-        </a>
-      </div>
-      <div class="product-info">
-        <span class="category">${product.category}</span>
-        <h3 class="product-title"><a href="product-detail.html?id=${product._id}">${product.name}</a></h3>
-        <div class="product-pricing">
-          <span class="current-price">${formatPrice(product.price)}</span>
-          ${product.mrp ? `<span class="original-price">${formatPrice(product.mrp)}</span>` : ''}
+    return `
+      <div class="product-card">
+        ${product.badge ? `<span class="badge">${product.badge}</span>` : ''}
+        <div class="product-thumb">
+          <a href="product-detail.html?id=${product._id}">
+            <img src="${imgUrl}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=600&q=80'">
+          </a>
         </div>
-        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
-          ${buyButtonHtml}
-          <a href="product-detail.html?id=${product._id}" class="btn btn-secondary" style="text-align: center; width: 100%;">View Details</a>
+        <div class="product-info">
+          <span class="category">${product.category}</span>
+          <h3 class="product-title"><a href="product-detail.html?id=${product._id}">${product.name}</a></h3>
+          <div class="product-pricing">
+            <span class="current-price">${CONFIG.currency || '₹'}${Number(product.price).toLocaleString('en-IN')}</span>
+            ${product.mrp ? `<span class="original-price">${CONFIG.currency \vert{}\vert{} '₹'}${Number(product.mrp).toLocaleString('en-IN')}</span>` : ''}
+          </div>
+          <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 8px;">
+            ${buyButtonHtml}
+            <a href="product-detail.html?id=${product._id}" class="btn btn-secondary" style="text-align: center; width: 100%;">View Details</a>
+          </div>
         </div>
       </div>
     `;
-    productsGrid.appendChild(card);
-  });
+  }).join('');
+}
+
+// 3. Initialize Shop and Category Buttons
+document.addEventListener('DOMContentLoaded', async () => {
+  const productsContainer = document.getElementById('all-products') || document.getElementById('products-grid');
+  const filtersContainer = document.getElementById('category-filters');
+
+  if (!productsContainer) return;
+
+  productsContainer.innerHTML = '<p style="color: var(--text-muted); text-align: center; grid-column: 1/-1;">Loading products...</p>';
+
+  const products = await fetchAllLiveProducts();
+  renderCards(products, productsContainer);
+
+  // Render Dynamic Category Buttons
+  if (filtersContainer && products.length > 0) {
+    const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+    
+    // Remove old dynamic buttons, keep only 'All'
+    filtersContainer.innerHTML = '<button class="filter-btn active" data-category="all">All</button>';
+
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-btn';
+      btn.dataset.category = cat;
+      btn.textContent = cat;
+      filtersContainer.appendChild(btn);
+    });
+
+    // Add Click Listener to Category Buttons
+    filtersContainer.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('filter-btn')) return;
+
+      filtersContainer.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+
+      const selectedCategory = e.target.dataset.category;
+      const filteredList = selectedCategory === 'all'
+        ? ALL_PRODUCTS_CACHE
+        : ALL_PRODUCTS_CACHE.filter(p => p.category === selectedCategory);
+
+      renderCards(filteredList, productsContainer);
+    });
+  }
 });
